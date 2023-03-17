@@ -73,7 +73,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   AC_CHECK_LIB($LIBNAME,[rd_kafka_init_transactions],[
     AC_DEFINE(HAS_RD_KAFKA_TRANSACTIONS,1,[ ])
-    SOURCES="$SOURCES kafka_error_exception.c"
+    SOURCES="kafka_error_exception.c $SOURCES"
   ],[
     AC_MSG_WARN([transactions are not available])
   ])
