@@ -4,6 +4,9 @@ dnl config.m4 for extension rdkafka
 PHP_ARG_WITH(rdkafka, for rdkafka support,
 [  --with-rdkafka             Include rdkafka support])
 
+PHP_ARG_WITH(transactions, for rdkafka transactions support,
+[  --with-transactions             Include rdkafka transactions support])
+
 if test "$PHP_RDKAFKA" != "no"; then
 
   SEARCH_PATH="/usr/local /usr"     # you might want to change this
@@ -11,7 +14,7 @@ if test "$PHP_RDKAFKA" != "no"; then
   if test -r $PHP_RDKAFKA/$SEARCH_FOR; then # path given as parameter
     RDKAFKA_DIR=$PHP_RDKAFKA
   else # search default path list
-    AC_MSG_CHECKING([for librdkafka/rdkafka.h" in default path])
+    AC_MSG_CHECKING([for librdkafka/rdkafka.h in default path])
     for i in $SEARCH_PATH ; do
       if test -r $i/$SEARCH_FOR; then
         RDKAFKA_DIR=$i
@@ -27,7 +30,7 @@ if test "$PHP_RDKAFKA" != "no"; then
 
   PHP_ADD_INCLUDE($RDKAFKA_DIR/include)
 
-  SOURCES="kafka_error_exception.c rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c"
+  SOURCES="rdkafka.c metadata.c metadata_broker.c metadata_topic.c metadata_partition.c metadata_collection.c conf.c topic.c queue.c message.c fun.c kafka_consumer.c topic_partition.c"
 
   LIBNAME=rdkafka
   LIBSYMBOL=rd_kafka_new
@@ -70,6 +73,15 @@ if test "$PHP_RDKAFKA" != "no"; then
   ],[
     AC_MSG_WARN([purge is not available])
   ])
+
+  if test "$PHP_TRANSACTIONS" != "no"; then
+    AC_CHECK_LIB($LIBNAME,[rd_kafka_init_transactions],[
+      AC_DEFINE(HAS_RD_KAFKA_TRANSACTIONS,1,[ ])
+      SOURCES="$SOURCES kafka_error_exception.c"
+    ],[
+      AC_MSG_WARN([transactions are not available])
+    ])
+  fi
 
   AC_CHECK_LIB($LIBNAME,[rd_kafka_msg_partitioner_murmur2],[
     AC_DEFINE(HAS_RD_KAFKA_PARTITIONER_MURMUR2,1,[ ])
